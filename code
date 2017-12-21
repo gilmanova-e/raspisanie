@@ -1,0 +1,164 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace raspisanie
+{
+    class Program
+    {
+        static bool log = true;
+       
+        const int n = 10;
+       
+        static Random rand = new Random();
+       
+        static int[] p = new int[n+1];
+
+        static Task[] Tasks = new Task[n];
+                
+        public struct Task
+        {
+            public int pay, time;
+            public bool f;
+
+            public Task(int p, int t)
+            {
+                f = true;
+                pay = p;
+                time = t;
+            }
+
+         
+        }
+        
+        static void Sort(Task[] T)
+        {
+            int temp;
+            for (int i = 0; i < n-1; i++)
+            {
+                for (int j = i + 1; j < n; j++)
+                {
+                    if (T[i].pay < T[j].pay)
+                    {
+                        temp = T[i].pay;
+                        T[i].pay = T[j].pay;
+                        T[j].pay = temp;
+                    }
+                }
+            }
+
+        }
+
+        static void Swap<T>(ref T l, ref T r)
+         {
+             T temp;
+             temp = l;
+             l = r;
+             r = temp;
+         }
+
+        static void MakeSet(int x)
+        {
+            p[x] = x; if (log)
+                Console.WriteLine("MakeSet x = " + Convert.ToString(x));
+        }
+        
+        static int Find(int x)
+        {
+            if (p[x] == x) return x;
+            return p[x] = Find(p[x]);
+        }
+
+        static void Unite(int x, int y)
+        {
+            x = Find(x);
+            y = Find(y);
+            p[y] = x;
+            if (log == true)
+                Console.WriteLine("Объединяю " + Convert.ToString(x) + " и "+ Convert.ToString(y));
+        }
+
+        
+
+        static void Main(string[] args)
+        {
+
+            Console.WriteLine("Выводить логи? y/n");
+            
+            string r = Convert.ToString(Console.Read());
+
+
+            if (r == "110")
+              log = false;
+        
+
+            for (int i = 0; i < n; i++)
+            {
+                p[i] = 0;
+                int f = rand.Next(30, 100);
+                int t = rand.Next(1, n+1);
+                Tasks[i] = new Task(f,t);                
+            }
+
+            p[n] = 0;
+
+            Sort(Tasks);
+
+            Console.Write(String.Format("{0,7:0.0}", "Задача|"));
+            Console.Write(String.Format("{0,6:0.0}", "Штраф|"));
+            Console.WriteLine(String.Format("{0,6:0.0}", "Время"));
+           
+            for (int i = 0; i < n; i++)
+            {
+                Console.Write(String.Format("{0,6:0}", Convert.ToString(i+1))+"|");
+                Console.Write(String.Format("{0,5:0}", Tasks[i].pay) + "|");
+                Console.WriteLine(String.Format("{0,5:0}", Tasks[i].time));
+            }
+
+            Console.WriteLine();
+            Console.WriteLine();
+
+            for (int i = 0; i < n; i++)
+            {
+                if (p[Tasks[i].time] != 0)
+                {
+                    int temp = Find(Tasks[i].time);
+                    Tasks[i].time = temp-1;
+                    if (log)
+                        Console.WriteLine("Find  " + Convert.ToString(temp));
+                    if (Tasks[i].time <= 0)
+                        Tasks[i].f = false;
+                }
+                if (Tasks[i].f)
+                {
+                    MakeSet(Tasks[i].time);
+
+                    if (Tasks[i].time > 0 && p[Tasks[i].time - 1] != 0)
+                        Unite(p[Tasks[i].time - 1], p[Tasks[i].time]);
+
+                    if (Tasks[i].time < n && p[Tasks[i].time + 1] != 0)
+                        Unite(p[Tasks[i].time], p[Tasks[i].time + 1]);
+                }
+             }
+
+
+            Console.WriteLine();
+            Console.WriteLine();
+
+            Console.WriteLine("Список задач в расписании:");
+
+            for (int i = 0; i < n; i++)
+                if (Tasks[i].f)
+                    Console.WriteLine("Задача " +Convert.ToString(i+1) + ": стоимость - " +
+                        Convert.ToString(Tasks[i].pay) + "; время - " + Convert.ToString(Tasks[i].time));
+
+            do
+            {
+                  
+            }
+            while (Console.ReadKey().Key != ConsoleKey.Escape);
+
+        }
+    }
+}
